@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dns-dos-lab
+data:
+  Corefile: |
+    example.com:53 {
+      file /etc/coredns/db.example.com
+    }
+  db.example.com: |
+    @  3600  IN  SOA  ns1.example.com.  root.example.com.  (
+       2019041900
+       3600
+       600
+       604800
+       600 )
+       3600  IN  NS  ns1.example.com
+       3600  IN  NS  ns2.example.com
+
+    ns1      IN  A  10.0.0.53
+             IN  AAAA  2001:db8:42:1::53
+    ns2      IN  A  10.0.1.53
+             IN  AAAA  2001:db8:42:2::53
+    www      IN  A  10.0.0.1
+             IN  AAAA  2001:db8:42:1::1
+    api      IN  A  10.0.0.12
+             IN  AAAA  2001:db8:42:1::12
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: dns-dos-lab
+  name: dns-dos-lab
+spec:
+  containers:
+  - name: coredns
+    image: coredns/coredns:latest
+    args: [ "-conf", "/etc/coredns/Corefile" ]
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/coredns
+      readOnly: true
+    ports:
+    - containerPort: 53
+      name: dns
+      protocol: UDP
+    - containerPort: 53
+      name: dns-tcp
+      protocol: TCP
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        add:
+        - NET_BIND_SERVICE
+        drop:
+        - all
+      readOnlyRootFilesystem: true
+  volumes:
+    - name: config-volume
+      configMap:
+        name: dns-dos-lab
+        items:
+        - key: Corefile
+          path: Corefile
+        - key: db.example.com
+          path: db.example.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns-dos-lab
+spec:
+  externalIPs:
+  - 10.1.20.53
+  selector:
+   run: dns-dos-lab
+  ports:
+  - port: 53
+    targetPort: 53
+    protocol: UDP
