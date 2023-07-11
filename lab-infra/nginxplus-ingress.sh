@@ -9,11 +9,11 @@ if [[ -f "nginx-repo.crt" && -f "nginx-repo.key" ]]; then
   sudo cp nginx-repo.key /etc/docker/certs.d/private-registry.nginx.com/client.key
 
   # pulling nginx ingress image to local registry
-  docker pull private-registry.nginx.com/nginx-ic-nap/nginx-plus-ingress:3.0.1
-  docker tag private-registry.nginx.com/nginx-ic-nap/nginx-plus-ingress:3.0.1 local-registry:5000/nginx-ic-nap/nginx-plus-ingress:3.0.1
-  docker push local-registry:5000/nginx-ic-nap/nginx-plus-ingress:3.0.1
+  docker pull private-registry.nginx.com/nginx-ic-nap/nginx-plus-ingress:3.2.0
+  docker tag private-registry.nginx.com/nginx-ic-nap/nginx-plus-ingress:3.2.0 local-registry:5000/nginx-ic-nap/nginx-plus-ingress:3.2.0
+  docker push local-registry:5000/nginx-ic-nap/nginx-plus-ingress:3.2.0
 
-  git clone https://github.com/nginxinc/kubernetes-ingress.git --branch v3.0.1
+  git clone https://github.com/nginxinc/kubernetes-ingress.git --branch v3.2.0
   
   cd kubernetes-ingress/deployments
 
@@ -40,7 +40,7 @@ if [[ -f "nginx-repo.crt" && -f "nginx-repo.key" ]]; then
   kubectl patch serviceaccount nginx-ingress -n nginx-ingress -p '{"imagePullSecrets": [{"name": "local-registry-cred"}]}'
 
   # update image
-  sed -i 's/image: nginx-plus-ingress:3.0.1/image: local-registry:5000\/nginx-ic-nap\/nginx-plus-ingress:3.0.1/g' daemon-set/nginx-plus-ingress.yaml
+  sed -i 's/image: nginx-plus-ingress:3.2.0/image: local-registry:5000\/nginx-ic-nap\/nginx-plus-ingress:3.2.0/g' daemon-set/nginx-plus-ingress.yaml
 
   # enable app protect
   sed -i 's/#- -enable-app-protect$/\ - -enable-app-protect/g' daemon-set/nginx-plus-ingress.yaml
