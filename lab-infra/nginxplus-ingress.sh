@@ -22,7 +22,7 @@ if [[ -f "nginx-repo.crt" && -f "nginx-repo.key" ]]; then
   # create RBAC
   kubectl apply -f rbac/rbac.yaml
   kubectl apply -f rbac/ap-rbac.yaml
-  kubectl apply -f common/default-server-secret.yaml
+  kubectl apply -f ../examples/shared-examples/default-server-secret/default-server-secret.yaml
   kubectl apply -f common/nginx-config.yaml
   kubectl apply -f common/ingress-class.yaml
 
